@@ -41,7 +41,7 @@ newtype Rope = Rope { unrope :: FingerTree Position Chunk }
 chunkLength :: Int
 chunkLength = 1000
 
--- | Append tries joins adjacent chunks if that can be done while staying below
+-- | Append joins adjacent chunks if that can be done while staying below
 -- @chunkLength@.
 instance Semigroup Rope where
   Rope r1 <> Rope r2 = case (FingerTree.viewr r1, FingerTree.viewl r2) of
@@ -92,13 +92,13 @@ fromShortText t
 toChunks :: Rope -> [Text]
 toChunks = fmap unchunk . toList . unrope
 
--- * Get the first chunk and the rest of the @Rope@ if non-empty
+-- | Get the first chunk and the rest of the @Rope@ if non-empty
 unconsChunk :: Rope -> Maybe (Text, Rope)
 unconsChunk (Rope r) = case FingerTree.viewl r of
   EmptyL -> Nothing
   Chunk t :< r' -> Just (t, Rope r')
 
--- * Get the last chunk and the rest of the @Rope@ if non-empty
+-- | Get the last chunk and the rest of the @Rope@ if non-empty
 unsnocChunk :: Rope -> Maybe (Rope, Text)
 unsnocChunk (Rope r) = case FingerTree.viewr r of
   EmptyR -> Nothing
