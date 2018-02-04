@@ -11,10 +11,11 @@ import Data.Semigroup
 import Data.String
 import Data.Text(Text)
 import qualified Data.Text as Text
+import qualified Data.Text.Lazy as Lazy
 import qualified Data.Text.Unsafe as Unsafe
 
-import Data.Rope.UTF16.Position
 import Data.Rope.UTF16.Internal.Text
+import Data.Rope.UTF16.Position
 
 newtype Chunk = Chunk { unchunk :: Text }
 
@@ -71,6 +72,9 @@ instance IsString Rope where
 
 toText :: Rope -> Text
 toText = Text.concat . toChunks
+
+toLazyText :: Rope -> Lazy.Text
+toLazyText = Lazy.fromChunks . toChunks
 
 fromText :: Text -> Rope
 fromText t
