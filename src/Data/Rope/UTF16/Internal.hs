@@ -23,17 +23,17 @@ instance Show Chunk where
   show (Chunk t) = show t
 
 instance FingerTree.Measured Position Chunk where
-  measure (Chunk t) = Position len $ go 0 $ Visual 0 0
+  measure (Chunk t) = Position len $ go 0 $ RowColumn 0 0
     where
       len = Unsafe.lengthWord16 t
       go i !v
         | i >= len = v
         | otherwise = case Unsafe.iter t i of
-          Unsafe.Iter '\n' delta -> go (i + delta) (v <> Visual 1 0)
-          Unsafe.Iter _ delta -> go (i + delta) (v <> Visual 0 delta)
+          Unsafe.Iter '\n' delta -> go (i + delta) (v <> RowColumn 1 0)
+          Unsafe.Iter _ delta -> go (i + delta) (v <> RowColumn 0 delta)
 
 -- | A @FingerTree@ of @Text@ values optimised for being indexed by and
--- modified at UTF-16 code points and row/column (@Visual@) positions.
+-- modified at UTF-16 code points and row/column (@RowColumn@) positions.
 -- Internal invariant: No empty @Chunk@s in the @FingerTree@
 newtype Rope = Rope { unrope :: FingerTree Position Chunk }
   deriving (FingerTree.Measured Position, Show)
@@ -137,21 +137,21 @@ take n = fst . Data.Rope.UTF16.Internal.splitAt n
 drop :: Int -> Rope -> Rope
 drop n = snd . Data.Rope.UTF16.Internal.splitAt n
 
--- | Get the code point index in the rope that corresponds to a visual position
-visualCodePoint :: Visual -> Rope -> Int
-visualCodePoint v (Rope r) = case FingerTree.viewl post of
+-- | Get the code point index in the rope that corresponds to a @RowColumn@ position
+rowColumnCodePoints :: RowColumn -> Rope -> Int
+rowColumnCodePoints v (Rope r) = case FingerTree.viewl post of
   EmptyL -> codePoints prePos
-  Chunk t :< _ -> go 0 $ visual prePos
+  Chunk t :< _ -> go 0 $ rowColumn prePos
     where
       len = Unsafe.lengthWord16 t
       go i !v'
         | v <= v' || i >= len = codePoints prePos + i
         | otherwise = case Unsafe.iter t i of
-          Unsafe.Iter '\n' delta -> go (i + delta) (v' <> Visual 1 0)
-          Unsafe.Iter _ 2 | v == v' <> Visual 0 1 -> codePoints prePos + i
-          Unsafe.Iter _ delta -> go (i + delta) (v' <> Visual 0 delta)
+          Unsafe.Iter '\n' delta -> go (i + delta) (v' <> RowColumn 1 0)
+          Unsafe.Iter _ 2 | v == v' <> RowColumn 0 1 -> codePoints prePos + i
+          Unsafe.Iter _ delta -> go (i + delta) (v' <> RowColumn 0 delta)
   where
-    (pre, post) = FingerTree.split ((> v) . visual) r
+    (pre, post) = FingerTree.split ((> v) . rowColumn) r
     prePos = FingerTree.measure pre
 
 -------------------------------------------------------------------------------

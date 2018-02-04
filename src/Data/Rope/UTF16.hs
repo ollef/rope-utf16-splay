@@ -16,7 +16,7 @@ module Data.Rope.UTF16
   , Rope.splitAt
   , Rope.take
   , Rope.drop
-  , Rope.visualCodePoint
+  , Rope.rowColumnCodePoints
 
   -- * Breaking by predicate
   , Rope.span
