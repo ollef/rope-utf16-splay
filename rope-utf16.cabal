@@ -13,6 +13,10 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
+source-repository head
+  type:     git
+  location: https://github.com/ollef/rope-utf16
+
 library
   hs-source-dirs:      src
   exposed-modules:
@@ -28,6 +32,17 @@ library
   ghc-options:         -Wall
                        -funbox-strict-fields
 
-source-repository head
-  type:     git
-  location: https://github.com/ollef/rope-utf16
+test-suite tests
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  build-depends:       base,
+                       QuickCheck,
+                       rope-utf16,
+                       tasty,
+                       tasty-hunit,
+                       tasty-quickcheck,
+                       text
+  other-modules:
