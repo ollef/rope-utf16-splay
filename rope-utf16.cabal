@@ -8,7 +8,7 @@ license-file:        LICENSE
 author:              Olle Fredriksson
 maintainer:          fredriksson.olle@gmail.com
 copyright:           (c) 2018 Olle Fredriksson
-category:            Web
+category:            Data, Text, Language
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
