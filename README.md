@@ -1,3 +1,4 @@
 # rope-utf16
 
-Finger trees of Text optimised for indexing by UTF-16 code points and row/column pairs.
+Thick strings optimised for indexing and updating using UTF-16 code points and
+row/column pairs.
