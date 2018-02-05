@@ -17,20 +17,26 @@ import qualified Data.Text.Unsafe as Unsafe
 import Data.Rope.UTF16.Internal.Text
 import Data.Rope.UTF16.Position
 
-newtype Chunk = Chunk { unchunk :: Text }
+data Chunk = Chunk { chunkText :: !Text, chunkMeasure :: !Position }
 
 instance Show Chunk where
-  show (Chunk t) = show t
+  show (Chunk t _) = show t
+
+instance Semigroup Chunk where
+  Chunk t1 m1 <> Chunk t2 m2 = Chunk (t1 <> t2) (m1 <> m2)
+
+chunk :: Text -> Chunk
+chunk t = Chunk t $ Position len $ go 0 $ RowColumn 0 0
+  where
+    len = Unsafe.lengthWord16 t
+    go i !v
+      | i >= len = v
+      | otherwise = case Unsafe.iter t i of
+        Unsafe.Iter '\n' delta -> go (i + delta) (v <> RowColumn 1 0)
+        Unsafe.Iter _ delta -> go (i + delta) (v <> RowColumn 0 delta)
 
 instance FingerTree.Measured Position Chunk where
-  measure (Chunk t) = Position len $ go 0 $ RowColumn 0 0
-    where
-      len = Unsafe.lengthWord16 t
-      go i !v
-        | i >= len = v
-        | otherwise = case Unsafe.iter t i of
-          Unsafe.Iter '\n' delta -> go (i + delta) (v <> RowColumn 1 0)
-          Unsafe.Iter _ delta -> go (i + delta) (v <> RowColumn 0 delta)
+  measure (Chunk _ m) = m
 
 -- | A @FingerTree@ of @Text@ values optimised for being indexed by and
 -- modified at UTF-16 code points and row/column (@RowColumn@) positions.
@@ -48,11 +54,11 @@ instance Semigroup Rope where
   Rope r1 <> Rope r2 = case (FingerTree.viewr r1, FingerTree.viewl r2) of
     (EmptyR, _) -> Rope r2
     (_, EmptyL) -> Rope r1
-    (r1' :> Chunk a, Chunk b :< r2')
-      | Unsafe.lengthWord16 a + Unsafe.lengthWord16 b <= chunkLength
-        -> Rope $ r1' `mappend` FingerTree.singleton (Chunk $ a <> b) `mappend` r2'
+    (r1' :> a, b :< r2')
+      | codePoints (chunkMeasure a <> chunkMeasure b) <= chunkLength
+        -> Rope $ r1' <> FingerTree.singleton (a <> b) <> r2'
       | otherwise
-        -> Rope $ r1 `mappend` r2
+        -> Rope $ r1 <> r2
 
 instance Monoid Rope where
   mempty = Rope mempty
@@ -82,31 +88,31 @@ fromText t
   | otherwise
     = Rope
     $ mconcat
-    $ FingerTree.singleton . Chunk <$> chunks16Of chunkLength t
+    $ FingerTree.singleton . chunk <$> chunks16Of chunkLength t
 
 fromShortText :: Text -> Rope
 fromShortText t
   | Text.null t = mempty
-  | otherwise = Rope $ FingerTree.singleton $ Chunk t
+  | otherwise = Rope $ FingerTree.singleton $ chunk t
 
 -------------------------------------------------------------------------------
 -- * Chunking
 
 -- | The raw @Text@ data that the @Rope@ is built from
 toChunks :: Rope -> [Text]
-toChunks = fmap unchunk . toList . unrope
+toChunks = fmap chunkText . toList . unrope
 
 -- | Get the first chunk and the rest of the @Rope@ if non-empty
 unconsChunk :: Rope -> Maybe (Text, Rope)
 unconsChunk (Rope r) = case FingerTree.viewl r of
   EmptyL -> Nothing
-  Chunk t :< r' -> Just (t, Rope r')
+  Chunk t _ :< r' -> Just (t, Rope r')
 
 -- | Get the last chunk and the rest of the @Rope@ if non-empty
 unsnocChunk :: Rope -> Maybe (Rope, Text)
 unsnocChunk (Rope r) = case FingerTree.viewr r of
   EmptyR -> Nothing
-  r' :> Chunk t -> Just (Rope r', t)
+  r' :> Chunk t _ -> Just (Rope r', t)
 
 -------------------------------------------------------------------------------
 -- * UTF-16 code point indexing
@@ -121,7 +127,7 @@ splitAt n (Rope r)
   | n <= 0 = (mempty, Rope r)
   | otherwise = case FingerTree.viewl post of
     EmptyL -> (Rope pre, Rope post)
-    Chunk t :< post' ->
+    Chunk t _ :< post' ->
       (Rope pre <> fromShortText pret, fromShortText postt <> Rope post')
       where
         n' = n - codePoints (FingerTree.measure pre)
@@ -141,7 +147,7 @@ drop n = snd . Data.Rope.UTF16.Internal.splitAt n
 rowColumnCodePoints :: RowColumn -> Rope -> Int
 rowColumnCodePoints v (Rope r) = case FingerTree.viewl post of
   EmptyL -> codePoints prePos
-  Chunk t :< _ -> go 0 $ rowColumn prePos
+  Chunk t _ :< _ -> go 0 $ rowColumn prePos
     where
       len = Unsafe.lengthWord16 t
       go i !v'
@@ -160,11 +166,11 @@ rowColumnCodePoints v (Rope r) = case FingerTree.viewl post of
 span :: (Char -> Bool) -> Rope -> (Rope, Rope)
 span f (Rope r) = case FingerTree.viewl r of
   EmptyL -> (mempty, mempty)
-  Chunk t :< r'
-    | Text.null postt -> (fromShortText t <> pre', post')
+  t :< r'
+    | Text.null postt -> (Rope (FingerTree.singleton t) <> pre', post')
     | otherwise -> (fromShortText pret, fromShortText postt <> Rope r')
     where
-      (pret, postt) = Text.span f t
+      (pret, postt) = Text.span f $ chunkText t
       (pre', post') = Data.Rope.UTF16.Internal.span f $ Rope r'
 
 break :: (Char -> Bool) -> Rope -> (Rope, Rope)
