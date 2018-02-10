@@ -30,7 +30,7 @@ library
                        Data.SplayTree
   build-depends:
                        base >= 4.7 && < 5,
-                       text
+                       text >= 1.0
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -funbox-strict-fields
@@ -41,7 +41,8 @@ test-suite tests
   main-is:             Main.hs
   default-language:    Haskell2010
   ghc-options:         -Wall
-  build-depends:       base,
+  build-depends:
+                       base,
                        QuickCheck,
                        rope-utf16-splay,
                        tasty,
