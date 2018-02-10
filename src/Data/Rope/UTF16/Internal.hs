@@ -74,7 +74,7 @@ instance IsString Rope where
   fromString = fromText . Text.pack
 
 -------------------------------------------------------------------------------
--- * Conversions to and from @Text@
+-- * Conversions to and from @Text@ and @String@
 
 toText :: Rope -> Text
 toText = Text.concat . toChunks
@@ -99,6 +99,9 @@ fromShortText :: Text -> Rope
 fromShortText t
   | Text.null t = mempty
   | otherwise = Rope $ SplayTree.singleton $ chunk t
+
+toString :: Rope -> String
+toString = concatMap Text.unpack . toChunks
 
 -------------------------------------------------------------------------------
 -- * Chunking
