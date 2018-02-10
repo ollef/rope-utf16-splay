@@ -1,9 +1,11 @@
 name:                rope-utf16-splay
 version:             0.1.0.0
-synopsis:            Ropes optimised for updating using UTF-16 code points and row/column pairs.
-description:         This implementation uses splay trees instead of the usual
-                     finger trees. According to my benchmarks, splay trees are
-                     faster in most situations.
+synopsis:            Ropes optimised for updating using UTF-16 code points and
+                     row/column pairs.
+description:         Ropes optimised for updating using UTF-16 code points and
+                     row/column pairs.  This implementation uses splay trees
+                     instead of the usual finger trees. According to my
+                     benchmarks, splay trees are faster in most situations.
 homepage:            https://github.com/ollef/rope-utf16-splay
 license:             BSD3
 license-file:        LICENSE
