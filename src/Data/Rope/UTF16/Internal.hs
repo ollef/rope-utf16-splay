@@ -38,9 +38,9 @@ chunk t = Chunk t $ Position len $ go 0 $ RowColumn 0 0
 instance SplayTree.Measured Position Chunk where
   measure (Chunk _ m) = m
 
--- | A @SplayTree@ of @Text@ values optimised for being indexed by and
--- modified at UTF-16 code points and row/column (@RowColumn@) positions.
--- Internal invariant: No empty @Chunk@s in the @SplayTree@
+-- | A 'SplayTree' of 'Text' values optimised for being indexed by and
+-- modified at UTF-16 code points and row/column ('RowColumn') positions.
+-- Internal invariant: No empty 'Chunk's in the 'SplayTree'
 newtype Rope = Rope { unrope :: SplayTree Position Chunk }
   deriving (SplayTree.Measured Position, Show)
 
@@ -49,7 +49,7 @@ chunkLength :: Int
 chunkLength = 1000
 
 -- | Append joins adjacent chunks if that can be done while staying below
--- @chunkLength@.
+-- 'chunkLength'.
 instance Semigroup Rope where
   Rope r1 <> Rope r2 = case (SplayTree.unsnoc r1, SplayTree.uncons r2) of
     (Nothing, _) -> Rope r2
@@ -74,7 +74,7 @@ instance IsString Rope where
   fromString = fromText . Text.pack
 
 -------------------------------------------------------------------------------
--- * Conversions to and from @Text@ and @String@
+-- * Conversions to and from 'Text' and 'String'
 
 toText :: Rope -> Text
 toText = Text.concat . toChunks
@@ -106,17 +106,17 @@ toString = concatMap Text.unpack . toChunks
 -------------------------------------------------------------------------------
 -- * Chunking
 
--- | The raw @Text@ data that the @Rope@ is built from
+-- | The raw 'Text' data that the 'Rope' is built from
 toChunks :: Rope -> [Text]
 toChunks = fmap chunkText . toList . unrope
 
--- | Get the first chunk and the rest of the @Rope@ if non-empty
+-- | Get the first chunk and the rest of the 'Rope' if non-empty
 unconsChunk :: Rope -> Maybe (Text, Rope)
 unconsChunk (Rope r) = case SplayTree.uncons r of
   Nothing -> Nothing
   Just (Chunk t _, r') -> Just (t, Rope r')
 
--- | Get the last chunk and the rest of the @Rope@ if non-empty
+-- | Get the last chunk and the rest of the 'Rope' if non-empty
 unsnocChunk :: Rope -> Maybe (Rope, Text)
 unsnocChunk (Rope r) = case SplayTree.unsnoc r of
   Nothing -> Nothing
@@ -148,7 +148,7 @@ take n = fst . Data.Rope.UTF16.Internal.splitAt n
 drop :: Int -> Rope -> Rope
 drop n = snd . Data.Rope.UTF16.Internal.splitAt n
 
--- | Get the code point index in the rope that corresponds to a @RowColumn@ position
+-- | Get the code point index in the rope that corresponds to a 'RowColumn' position
 rowColumnCodePoints :: RowColumn -> Rope -> Int
 rowColumnCodePoints v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
   SplayTree.Outside

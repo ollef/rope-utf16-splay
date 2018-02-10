@@ -2,7 +2,7 @@ module Data.Rope.UTF16
   ( module Position
   , Rope.Rope
 
-  -- * Conversions to and from @Text@ and @String@
+  -- * Conversions to and from 'Text' and 'String'
   , Rope.toText
   , Rope.toLazyText
   , Rope.fromText
