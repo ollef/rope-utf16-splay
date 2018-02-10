@@ -1,7 +1,6 @@
 name:                rope-utf16-splay
 version:             0.1.0.0
-synopsis:            Thick strings optimised for indexing and updating using
-                     UTF-16 code points and row/column pairs.
+synopsis:            Ropes optimised for updating using UTF-16 code points and row/column pairs.
 description:         This implementation uses splay trees instead of the usual
                      finger trees. According to my benchmarks, splay trees are
                      faster in most situations.
@@ -15,6 +14,7 @@ category:            Data, Text, Language
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+tested-with:         GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1
 
 source-repository head
   type:     git
@@ -29,7 +29,7 @@ library
                        Data.Rope.UTF16.Position
                        Data.SplayTree
   build-depends:
-                       base >= 4.7 && < 5,
+                       base >= 4.9 && < 5,
                        text >= 1.0
   default-language:    Haskell2010
   ghc-options:         -Wall
