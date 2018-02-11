@@ -21,7 +21,7 @@ main = defaultMain $ testGroup "Tests"
         t2 = Text.pack s2
     Rope.toText (Rope.fromText t1 <> Rope.fromText t2) == t1 <> t2
 
-  , testProperty "length is UTF-16 code points" $ \s -> do
+  , testProperty "length is UTF-16 code units" $ \s -> do
     let t = Text.pack s
     Rope.length (Rope.fromText t) == Unsafe.lengthWord16 t
 
@@ -38,13 +38,13 @@ main = defaultMain $ testGroup "Tests"
     let t = Text.pack s
     Rope.toText (Rope.drop i $ Rope.fromText t) == Rope.drop16 i t
 
-  , testProperty "rowColumnCodePoints first line" $ \s i -> do
+  , testProperty "rowColumnCodeUnits first line" $ \s i -> do
     let t = Text.pack $ takeWhile (/= '\n') s
-    Rope.clamp16 i t == Rope.rowColumnCodePoints (Rope.RowColumn 0 i) (Rope.fromText t)
+    Rope.clamp16 i t == Rope.rowColumnCodeUnits (Rope.RowColumn 0 i) (Rope.fromText t)
 
-  , testProperty "rowColumnCodePoints subsequent lines" $ \s (NonNegative newlines) (NonNegative i) -> do
+  , testProperty "rowColumnCodeUnits subsequent lines" $ \s (NonNegative newlines) (NonNegative i) -> do
     let t = Text.pack $ replicate newlines '\n' ++ takeWhile (/= '\n') s
-    Rope.clamp16 (newlines + i) t == Rope.rowColumnCodePoints (Rope.RowColumn newlines i) (Rope.fromText t)
+    Rope.clamp16 (newlines + i) t == Rope.rowColumnCodeUnits (Rope.RowColumn newlines i) (Rope.fromText t)
 
   , testProperty "span matches Text" $ \s p -> do
     let t = Text.pack s

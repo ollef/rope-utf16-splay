@@ -39,12 +39,12 @@ instance SplayTree.Measured Position Chunk where
   measure (Chunk _ m) = m
 
 -- | A 'SplayTree' of 'Text' values optimised for being indexed by and
--- modified at UTF-16 code points and row/column ('RowColumn') positions.
+-- modified at UTF-16 code units and row/column ('RowColumn') positions.
 -- Internal invariant: No empty 'Chunk's in the 'SplayTree'
 newtype Rope = Rope { unrope :: SplayTree Position Chunk }
   deriving (SplayTree.Measured Position, Show)
 
--- | The maximum length, in code points, of a chunk
+-- | The maximum length, in code units, of a chunk
 chunkLength :: Int
 chunkLength = 1000
 
@@ -55,7 +55,7 @@ instance Semigroup Rope where
     (Nothing, _) -> Rope r2
     (_, Nothing) -> Rope r1
     (Just (r1', a), Just (b, r2'))
-      | codePoints (chunkMeasure a <> chunkMeasure b) <= chunkLength
+      | codeUnits (SplayTree.measure a) + codeUnits (SplayTree.measure b) <= chunkLength
         -> Rope $ r1' <> ((a <> b) SplayTree.<| r2')
       | otherwise
         -> Rope $ r1' <> (a SplayTree.<| b SplayTree.<| r2')
@@ -123,46 +123,48 @@ unsnocChunk (Rope r) = case SplayTree.unsnoc r of
   Just (r', Chunk t _) -> Just (Rope r', t)
 
 -------------------------------------------------------------------------------
--- * UTF-16 code point indexing
+-- * UTF-16 code unit indexing
 
--- | Length in code points (not characters)
+-- | Length in code units (not characters)
 length :: Rope -> Int
-length = codePoints . SplayTree.measure
+length = codeUnits . SplayTree.measure
 
--- | Split the rope at the nth code point (not character)
+-- | Split the rope at the nth code unit (not character)
 splitAt :: Int -> Rope -> (Rope, Rope)
-splitAt n (Rope r) = case SplayTree.split ((> n) . codePoints) r of
+splitAt n (Rope r) = case SplayTree.split ((> n) . codeUnits) r of
   SplayTree.Outside
     | n < 0 -> (mempty, Rope r)
     | otherwise -> (Rope r, mempty)
   SplayTree.Inside pre (Chunk t _) post -> (Rope pre <> fromShortText pret, fromShortText postt <> Rope post)
     where
-      n' = n - codePoints (SplayTree.measure pre)
+      n' = n - codeUnits (SplayTree.measure pre)
       (pret, postt) = split16At n' t
 
--- | Take the first n code points (not characters)
+-- | Take the first n code units (not characters)
 take :: Int -> Rope -> Rope
 take n = fst . Data.Rope.UTF16.Internal.splitAt n
 
--- | Drop the first n code points (not characters)
+-- | Drop the first n code units (not characters)
 drop :: Int -> Rope -> Rope
 drop n = snd . Data.Rope.UTF16.Internal.splitAt n
 
--- | Get the code point index in the rope that corresponds to a 'RowColumn' position
-rowColumnCodePoints :: RowColumn -> Rope -> Int
-rowColumnCodePoints v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
+-- | Get the code unit index in the rope that corresponds to a 'RowColumn' position
+--
+-- @since 0.2.0.0
+rowColumnCodeUnits :: RowColumn -> Rope -> Int
+rowColumnCodeUnits v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
   SplayTree.Outside
     | v <= RowColumn 0 0 -> 0
-    | otherwise -> codePoints $ SplayTree.measure r
+    | otherwise -> codeUnits $ SplayTree.measure r
   SplayTree.Inside pre (Chunk t _) _ -> go 0 $ rowColumn prePos
     where
       prePos = SplayTree.measure pre
       len = Unsafe.lengthWord16 t
       go i !v'
-        | v <= v' || i >= len = codePoints prePos + i
+        | v <= v' || i >= len = codeUnits prePos + i
         | otherwise = case Unsafe.iter t i of
           Unsafe.Iter '\n' delta -> go (i + delta) (v' <> RowColumn 1 0)
-          Unsafe.Iter _ 2 | v == v' <> RowColumn 0 1 -> codePoints prePos + i
+          Unsafe.Iter _ 2 | v == v' <> RowColumn 0 1 -> codeUnits prePos + i
           Unsafe.Iter _ delta -> go (i + delta) (v' <> RowColumn 0 delta)
 
 -------------------------------------------------------------------------------

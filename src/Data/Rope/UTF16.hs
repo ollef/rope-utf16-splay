@@ -13,12 +13,12 @@ module Data.Rope.UTF16
   , Rope.unconsChunk
   , Rope.unsnocChunk
 
-  -- * UTF-16 code point indexing
+  -- * UTF-16 code unit indexing
   , Rope.length
   , Rope.splitAt
   , Rope.take
   , Rope.drop
-  , Rope.rowColumnCodePoints
+  , Rope.rowColumnCodeUnits
 
   -- * Breaking by predicate
   , Rope.span

@@ -1,4 +1,4 @@
--- | Helpers for working with 'Text' in UTF-16 code points
+-- | Helpers for working with 'Text' in UTF-16 code units
 module Data.Rope.UTF16.Internal.Text where
 
 import Data.Text(Text)

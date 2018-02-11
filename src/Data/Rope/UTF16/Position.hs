@@ -4,7 +4,7 @@ import Data.Semigroup
 
 data RowColumn = RowColumn
   { row :: !Int -- ^ Number of newlines before this position
-  , column :: !Int -- ^ Number of code points since last newline or start of string
+  , column :: !Int -- ^ Number of code units since last newline or start of string
   } deriving (Eq, Ord, Show)
 
 instance Semigroup RowColumn where
@@ -18,7 +18,7 @@ instance Monoid RowColumn where
   mappend = (<>)
 
 data Position = Position
-  { codePoints :: !Int
+  { codeUnits :: !Int
   , rowColumn :: !RowColumn
   } deriving (Eq, Ord, Show)
 
