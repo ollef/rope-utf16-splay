@@ -67,4 +67,8 @@ main = defaultMain $ testGroup "Tests"
     let t = Text.pack s
         f = QC.applyFun p
     Rope.toText (Rope.dropWhile f $ Rope.fromText t) == Text.dropWhile f t
+
+  , testProperty "null matches Text" $ \s -> do
+    let t = Text.pack s
+    Rope.null (Rope.fromText t) == Text.null t
   ]

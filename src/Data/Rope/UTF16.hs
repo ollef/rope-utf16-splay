@@ -2,6 +2,9 @@ module Data.Rope.UTF16
   ( module Position
   , Rope.Rope
 
+  -- * Queries
+  , Rope.null
+
   -- * Conversions to and from 'Text' and 'String'
   , Rope.toText
   , Rope.toLazyText

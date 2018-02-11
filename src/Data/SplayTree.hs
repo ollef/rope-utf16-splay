@@ -35,6 +35,13 @@ instance Measured v a => Monoid (SplayTree v a) where
   {-# INLINE mappend #-}
   mappend = (Semigroup.<>)
 
+-- | Is the splay tree empty?
+--
+-- @since 0.2.0.0
+null :: SplayTree v a -> Bool
+null Leaf = True
+null Fork {} = False
+
 -------------------------------------------------------------------------------
 -- * Construction
 

@@ -74,6 +74,16 @@ instance IsString Rope where
   fromString = fromText . Text.pack
 
 -------------------------------------------------------------------------------
+-- * Queries
+
+-- | Is the rope empty?
+--
+-- @since 0.2.0.0
+{-# INLINE null #-}
+null :: Rope -> Bool
+null (Rope r) = SplayTree.null r
+
+-------------------------------------------------------------------------------
 -- * Conversions to and from 'Text' and 'String'
 
 toText :: Rope -> Text
