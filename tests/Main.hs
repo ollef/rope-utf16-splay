@@ -71,4 +71,15 @@ main = defaultMain $ testGroup "Tests"
   , testProperty "null matches Text" $ \s -> do
     let t = Text.pack s
     Rope.null (Rope.fromText t) == Text.null t
+
+  , testProperty "rows is number of newlines" $ \s -> do
+    let t = Text.pack s
+        newlines = length $ filter (== '\n') s
+    Rope.rows (Rope.fromText t) == newlines
+
+  , testProperty "columns is number of code units of last line" $ \s -> do
+    let t = Text.pack s
+        lastLine = Text.takeWhileEnd (/= '\n') t
+        cols = Unsafe.lengthWord16 lastLine
+    Rope.columns (Rope.fromText t) == cols
   ]

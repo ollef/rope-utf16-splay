@@ -83,6 +83,23 @@ instance IsString Rope where
 null :: Rope -> Bool
 null (Rope r) = SplayTree.null r
 
+-- | Length in code units (not characters)
+length :: Rope -> Int
+length = codeUnits . SplayTree.measure
+
+-- | The number of newlines in the rope
+--
+-- @since 0.3.0.0
+rows :: Rope -> Int
+rows (Rope r) = row $ rowColumn $ SplayTree.measure r
+
+-- | The number of code units (not characters) since the last newline or the
+-- start of the rope
+--
+-- @since 0.3.0.0
+columns :: Rope -> Int
+columns (Rope r) = column $ rowColumn $ SplayTree.measure r
+
 -------------------------------------------------------------------------------
 -- * Conversions to and from 'Text' and 'String'
 
@@ -134,10 +151,6 @@ unsnocChunk (Rope r) = case SplayTree.unsnoc r of
 
 -------------------------------------------------------------------------------
 -- * UTF-16 code unit indexing
-
--- | Length in code units (not characters)
-length :: Rope -> Int
-length = codeUnits . SplayTree.measure
 
 -- | Split the rope at the nth code unit (not character)
 splitAt :: Int -> Rope -> (Rope, Rope)

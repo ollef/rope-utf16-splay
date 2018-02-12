@@ -4,6 +4,9 @@ module Data.Rope.UTF16
 
   -- * Queries
   , Rope.null
+  , Rope.length
+  , Rope.rows
+  , Rope.columns
 
   -- * Conversions to and from 'Text' and 'String'
   , Rope.toText
@@ -17,7 +20,6 @@ module Data.Rope.UTF16
   , Rope.unsnocChunk
 
   -- * UTF-16 code unit indexing
-  , Rope.length
   , Rope.splitAt
   , Rope.take
   , Rope.drop
