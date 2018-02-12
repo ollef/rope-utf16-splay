@@ -1,6 +1,7 @@
 # 0.3.0.0
 
 - Add `rows` and `columns` functions
+- Make `Position` module internal
 
 # 0.2.0.0
 

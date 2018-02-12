@@ -1,6 +1,5 @@
 module Data.Rope.UTF16
-  ( module Position
-  , Rope.Rope
+  ( Rope.Rope
 
   -- * Queries
   , Rope.null
@@ -23,6 +22,7 @@ module Data.Rope.UTF16
   , Rope.splitAt
   , Rope.take
   , Rope.drop
+  , Position.RowColumn(..)
   , Rope.rowColumnCodeUnits
 
   -- * Breaking by predicate
@@ -32,5 +32,5 @@ module Data.Rope.UTF16
   , Rope.dropWhile
   ) where
 
-import Data.Rope.UTF16.Position as Position
 import Data.Rope.UTF16.Internal as Rope
+import Data.Rope.UTF16.Internal.Position as Position

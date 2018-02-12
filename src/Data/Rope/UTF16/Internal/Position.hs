@@ -1,4 +1,4 @@
-module Data.Rope.UTF16.Position where
+module Data.Rope.UTF16.Internal.Position where
 
 import Data.Semigroup
 
@@ -21,9 +21,6 @@ data Position = Position
   { codeUnits :: !Int
   , rowColumn :: !RowColumn
   } deriving (Eq, Ord, Show)
-
-lineStart :: Position -> Position
-lineStart (Position cp (RowColumn r c)) = Position (cp - c) $ RowColumn r 0
 
 instance Semigroup Position where
   Position cp1 v1 <> Position cp2 v2

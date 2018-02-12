@@ -13,7 +13,7 @@ import qualified Data.Text.Lazy as Lazy
 import qualified Data.Text.Unsafe as Unsafe
 
 import Data.Rope.UTF16.Internal.Text
-import Data.Rope.UTF16.Position
+import Data.Rope.UTF16.Internal.Position
 import Data.SplayTree(SplayTree)
 import qualified Data.SplayTree as SplayTree
 

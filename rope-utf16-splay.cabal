@@ -29,8 +29,8 @@ library
   exposed-modules:
                        Data.Rope.UTF16
                        Data.Rope.UTF16.Internal
+                       Data.Rope.UTF16.Internal.Position
                        Data.Rope.UTF16.Internal.Text
-                       Data.Rope.UTF16.Position
                        Data.SplayTree
   build-depends:
                        base >= 4.9 && < 5,
