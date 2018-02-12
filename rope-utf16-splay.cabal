@@ -1,5 +1,5 @@
 name:                rope-utf16-splay
-version:             0.2.0.0
+version:             0.3.0.0
 synopsis:            Ropes optimised for updating using UTF-16 code units and
                      row/column pairs.
 description:         Ropes optimised for updating using UTF-16 code units and

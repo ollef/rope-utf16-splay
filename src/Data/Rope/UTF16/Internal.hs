@@ -209,6 +209,7 @@ rowColumnCodeUnits v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
 -------------------------------------------------------------------------------
 -- * Breaking by predicate
 
+-- | @span f r = (takeWhile f r, dropWhile f r)@
 span :: (Char -> Bool) -> Rope -> (Rope, Rope)
 span f (Rope r) = case SplayTree.uncons r of
   Nothing -> (mempty, mempty)
@@ -219,12 +220,15 @@ span f (Rope r) = case SplayTree.uncons r of
       (pret, postt) = Text.span f $ chunkText t
       (pre', post') = Data.Rope.UTF16.Internal.span f $ Rope r'
 
+-- | @break f = span (not . f)@
 break :: (Char -> Bool) -> Rope -> (Rope, Rope)
 break f = Data.Rope.UTF16.Internal.span (not . f)
 
+-- | @takeWhile f = fst . span f@
 takeWhile :: (Char -> Bool) -> Rope -> Rope
 takeWhile f = fst . Data.Rope.UTF16.Internal.span f
 
+-- | @dropWhile f = snd . span f@
 dropWhile :: (Char -> Bool) -> Rope -> Rope
 dropWhile f = snd . Data.Rope.UTF16.Internal.span f
 
