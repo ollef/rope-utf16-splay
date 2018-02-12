@@ -256,13 +256,13 @@ foldr f a (Rope r) = Foldable.foldr (\c a' -> Text.foldr f a' $ chunkText c) a r
 -------------------------------------------------------------------------------
 -- * Special folds
 
--- |
+-- | Do any characters in the rope satisfy the predicate?
 --
 -- @since 0.3.0.0
 any :: (Char -> Bool) -> Rope -> Bool
 any p (Rope r) = getAny $ foldMap (Any . Text.any p . chunkText) r
 
--- |
+-- | Do all characters in the rope satisfy the predicate?
 --
 -- @since 0.3.0.0
 all :: (Char -> Bool) -> Rope -> Bool
