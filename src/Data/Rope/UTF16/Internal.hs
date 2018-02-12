@@ -3,8 +3,9 @@
 {-# language MultiParamTypeClasses #-}
 module Data.Rope.UTF16.Internal where
 
-import Data.Foldable
+import Data.Foldable as Foldable
 import Data.Function
+import Data.List
 import Data.Semigroup
 import Data.String
 import Data.Text(Text)
@@ -12,8 +13,8 @@ import qualified Data.Text as Text
 import qualified Data.Text.Lazy as Lazy
 import qualified Data.Text.Unsafe as Unsafe
 
-import Data.Rope.UTF16.Internal.Text
 import Data.Rope.UTF16.Internal.Position
+import Data.Rope.UTF16.Internal.Text
 import Data.SplayTree(SplayTree)
 import qualified Data.SplayTree as SplayTree
 
@@ -101,7 +102,7 @@ columns :: Rope -> Int
 columns (Rope r) = column $ rowColumn $ SplayTree.measure r
 
 -------------------------------------------------------------------------------
--- * Conversions to and from 'Text' and 'String'
+-- * Conversions
 
 toText :: Rope -> Text
 toText = Text.concat . toChunks
@@ -128,7 +129,22 @@ fromShortText t
   | otherwise = Rope $ SplayTree.singleton $ chunk t
 
 toString :: Rope -> String
-toString = concatMap Text.unpack . toChunks
+toString = Foldable.concatMap Text.unpack . toChunks
+
+-------------------------------------------------------------------------------
+-- * Transformations
+
+-- | Map over the characters of a rope
+--
+-- @since 0.3.0.0
+map :: (Char -> Char) -> Rope -> Rope
+map f (Rope r) = Rope $ SplayTree.map (chunk . Text.map f . chunkText) r
+
+-- | Concatenate the interspersion of a rope between the elements of a list of ropes
+--
+-- @since 0.3.0.0
+intercalate :: Rope -> [Rope] -> Rope
+intercalate r rs = mconcat $ intersperse r rs
 
 -------------------------------------------------------------------------------
 -- * Chunking
@@ -211,3 +227,39 @@ takeWhile f = fst . Data.Rope.UTF16.Internal.span f
 
 dropWhile :: (Char -> Bool) -> Rope -> Rope
 dropWhile f = snd . Data.Rope.UTF16.Internal.span f
+
+-------------------------------------------------------------------------------
+-- * Folds
+
+-- | Fold left
+--
+-- @since 0.3.0.0
+foldl :: (a -> Char -> a) -> a -> Rope -> a
+foldl f a (Rope r) = Foldable.foldl (\a' c -> Text.foldl f a' $ chunkText c) a r
+
+-- | A strict version of 'foldl'
+--
+-- @since 0.3.0.0
+foldl' :: (a -> Char -> a) -> a -> Rope -> a
+foldl' f a (Rope r) = Foldable.foldl' (\a' c -> Text.foldl' f a' $ chunkText c) a r
+
+-- | Fold right
+--
+-- @since 0.3.0.0
+foldr :: (Char -> a -> a) -> a -> Rope -> a
+foldr f a (Rope r) = Foldable.foldr (\c a' -> Text.foldr f a' $ chunkText c) a r
+
+-------------------------------------------------------------------------------
+-- * Special folds
+
+-- |
+--
+-- @since 0.3.0.0
+any :: (Char -> Bool) -> Rope -> Bool
+any p (Rope r) = getAny $ foldMap (Any . Text.any p . chunkText) r
+
+-- |
+--
+-- @since 0.3.0.0
+all :: (Char -> Bool) -> Rope -> Bool
+all p (Rope r) = getAll $ foldMap (All . Text.all p . chunkText) r

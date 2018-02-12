@@ -7,11 +7,15 @@ module Data.Rope.UTF16
   , Rope.rows
   , Rope.columns
 
-  -- * Conversions to and from 'Text' and 'String'
+  -- * Conversions
   , Rope.toText
   , Rope.toLazyText
   , Rope.fromText
   , Rope.toString
+
+  -- * Transformations
+  , Rope.map
+  , Rope.intercalate
 
   -- * Chunking
   , Rope.toChunks
@@ -30,6 +34,15 @@ module Data.Rope.UTF16
   , Rope.break
   , Rope.takeWhile
   , Rope.dropWhile
+
+  -- * Folds
+  , Rope.foldl
+  , Rope.foldl'
+  , Rope.foldr
+
+  -- * Special folds
+  , Rope.any
+  , Rope.all
   ) where
 
 import Data.Rope.UTF16.Internal as Rope

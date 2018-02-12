@@ -2,6 +2,8 @@
 
 - Add `rows` and `columns` functions
 - Make `Position` module internal
+- Add `map` and `intersperse` functions
+- Add `foldl`, `foldl'`, `foldr`, `any`, and `all` functions
 
 # 0.2.0.0
 

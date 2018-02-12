@@ -82,4 +82,39 @@ main = defaultMain $ testGroup "Tests"
         lastLine = Text.takeWhileEnd (/= '\n') t
         cols = Unsafe.lengthWord16 lastLine
     Rope.columns (Rope.fromText t) == cols
+
+  , testProperty "foldl matches Text" $ \s p a -> do
+    let t = Text.pack s
+        f = QC.applyFun2 p
+    Rope.foldl f (a :: Int) (Rope.fromText t) == Text.foldl f a t
+
+  , testProperty "foldl' matches Text" $ \s p a -> do
+    let t = Text.pack s
+        f = QC.applyFun2 p
+    Rope.foldl' f (a :: Int) (Rope.fromText t) == Text.foldl' f a t
+
+  , testProperty "foldr matches Text" $ \s p a -> do
+    let t = Text.pack s
+        f = QC.applyFun2 p
+    Rope.foldr f (a :: Int) (Rope.fromText t) == Text.foldr f a t
+
+  , testProperty "any matches Text" $ \s p -> do
+    let t = Text.pack s
+        f = QC.applyFun p
+    Rope.any f (Rope.fromText t) == Text.any f t
+
+  , testProperty "all matches Text" $ \s p -> do
+    let t = Text.pack s
+        f = QC.applyFun p
+    Rope.all f (Rope.fromText t) == Text.all f t
+
+  , testProperty "map matches Text" $ \s p -> do
+    let t = Text.pack s
+        f = QC.applyFun p
+    Rope.toText (Rope.map f (Rope.fromText t)) == Text.map f t
+
+  , testProperty "intercalate matches Text" $ \s ss -> do
+    let t = Text.pack s
+        ts = Text.pack <$> ss
+    Rope.toText (Rope.intercalate (Rope.fromText t) (Rope.fromText <$> ts)) == Text.intercalate t ts
   ]
