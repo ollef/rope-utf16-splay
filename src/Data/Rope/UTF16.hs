@@ -28,6 +28,7 @@ module Data.Rope.UTF16
   , Rope.drop
   , Position.RowColumn(..)
   , Rope.rowColumnCodeUnits
+  , Rope.splitAtLine
 
   -- * Breaking by predicate
   , Rope.span

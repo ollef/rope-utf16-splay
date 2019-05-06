@@ -1,3 +1,7 @@
+# 0.3.1.0
+
+- Add `splitAtLine` function
+
 # 0.3.0.0
 
 - Add `rows` and `columns` functions

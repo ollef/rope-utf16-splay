@@ -1,6 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Data.Semigroup
+import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Unsafe as Unsafe
 import Test.QuickCheck.Function as QC
@@ -45,6 +47,11 @@ main = defaultMain $ testGroup "Tests"
   , testProperty "rowColumnCodeUnits subsequent lines" $ \s (NonNegative newlines) (NonNegative i) -> do
     let t = Text.pack $ replicate newlines '\n' ++ takeWhile (/= '\n') s
     Rope.clamp16 (newlines + i) t == Rope.rowColumnCodeUnits (Rope.RowColumn newlines i) (Rope.fromText t)
+
+  , testProperty "splitAtLine" $ \s i -> do
+    let t = Text.pack s
+        (rows1', rows2') = Rope.splitAtLine i (Rope.fromText t)
+    splitAtLineSpec i t == (Rope.toText rows1', Rope.toText rows2')
 
   , testProperty "span matches Text" $ \s p -> do
     let t = Text.pack s
@@ -118,3 +125,10 @@ main = defaultMain $ testGroup "Tests"
         ts = Text.pack <$> ss
     Rope.toText (Rope.intercalate (Rope.fromText t) (Rope.fromText <$> ts)) == Text.intercalate t ts
   ]
+
+splitAtLineSpec :: Int -> Text -> (Text, Text)
+splitAtLineSpec i t = case Text.splitOn "\n" t of
+  [] -> ("", "")
+  ts -> do
+    let (pres, posts) = splitAt i (fmap (<> "\n") (init ts) <> [last ts])
+    (Text.concat pres, Text.concat posts)

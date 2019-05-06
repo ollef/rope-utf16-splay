@@ -207,6 +207,17 @@ rowColumnCodeUnits v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
           Unsafe.Iter _ delta -> go (i + delta) (v' <> RowColumn 0 delta)
 
 -------------------------------------------------------------------------------
+-- * Lines
+
+-- | Split the rope immediately after the i:th newline
+--
+-- @since 0.3.1.0
+splitAtLine :: Int -> Rope -> (Rope, Rope)
+splitAtLine r rope = Data.Rope.UTF16.Internal.splitAt i rope
+  where
+    i = rowColumnCodeUnits (RowColumn r 0) rope
+
+-------------------------------------------------------------------------------
 -- * Breaking by predicate
 
 -- | @span f r = (takeWhile f r, dropWhile f r)@
