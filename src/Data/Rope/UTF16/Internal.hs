@@ -15,7 +15,7 @@ import qualified Data.Text.Unsafe as Unsafe
 
 import Data.Rope.UTF16.Internal.Position
 import Data.Rope.UTF16.Internal.Text
-import Data.SplayTree(SplayTree)
+import Data.SplayTree(SplayTree, measure)
 import qualified Data.SplayTree as SplayTree
 
 data Chunk = Chunk { chunkText :: !Text, chunkMeasure :: !Position }
@@ -205,6 +205,14 @@ rowColumnCodeUnits v (Rope r) = case SplayTree.split ((> v) . rowColumn) r of
           Unsafe.Iter '\n' delta -> go (i + delta) (v' <> RowColumn 1 0)
           Unsafe.Iter _ 2 | v == v' <> RowColumn 0 1 -> codeUnits prePos + i
           Unsafe.Iter _ delta -> go (i + delta) (v' <> RowColumn 0 delta)
+
+-- | Get the 'RowColumn' position that corresponds to a code unit
+-- index in the rope
+--
+-- @since 0.3.2.0
+codeUnitsRowColumn :: Int -> Rope -> RowColumn
+codeUnitsRowColumn offset rope
+  = (rowColumn . measure) (Data.Rope.UTF16.Internal.take offset rope)
 
 -------------------------------------------------------------------------------
 -- * Lines
