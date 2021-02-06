@@ -1,3 +1,7 @@
+# 0.3.2.0
+
+- Add `codeUnitsRowColumn` function
+
 # 0.3.1.0
 
 - Add `splitAtLine` function

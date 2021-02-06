@@ -48,6 +48,11 @@ main = defaultMain $ testGroup "Tests"
     let t = Text.pack $ replicate newlines '\n' ++ takeWhile (/= '\n') s
     Rope.clamp16 (newlines + i) t == Rope.rowColumnCodeUnits (Rope.RowColumn newlines i) (Rope.fromText t)
 
+  , testProperty "codeUnitsRowColumn" $ \s i -> do
+    let t = Text.pack s
+        rowColumn = Rope.codeUnitsRowColumn i (Rope.fromText t)
+    codeUnitsRowColumnSpec i t == rowColumn
+
   , testProperty "splitAtLine" $ \s i -> do
     let t = Text.pack s
         (rows1', rows2') = Rope.splitAtLine i (Rope.fromText t)
@@ -132,3 +137,13 @@ splitAtLineSpec i t = case Text.splitOn "\n" t of
   ts -> do
     let (pres, posts) = splitAt i (fmap (<> "\n") (init ts) <> [last ts])
     (Text.concat pres, Text.concat posts)
+
+codeUnitsRowColumnSpec :: Int -> Text -> Rope.RowColumn
+codeUnitsRowColumnSpec i t = r
+  where
+    ts = Text.splitOn "\n" (Rope.take16 i t)
+    r = case ts of
+      []   -> Rope.RowColumn 0 0
+      [""] -> Rope.RowColumn 0 0
+      _ -> do
+        Rope.RowColumn (length (init ts)) (Unsafe.lengthWord16 (last ts))
