@@ -23,8 +23,8 @@ data Position = Position
   } deriving (Eq, Ord, Show)
 
 instance Semigroup Position where
-  Position cp1 v1 <> Position cp2 v2
-    = Position (cp1 + cp2) (v1 <> v2)
+  Position cu rc <> Position cu' rc'
+    = Position (cu + cu') (rc <> rc')
 
 instance Monoid Position where
   mempty = Position 0 mempty
