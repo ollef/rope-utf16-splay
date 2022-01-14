@@ -1,38 +1,74 @@
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE NumericUnderscores #-}
 -- | Helpers for working with 'Text' in UTF-16 code units
 module Data.Rope.UTF16.Internal.Text where
 
 import Data.Text(Text)
 import qualified Data.Text.Array as Array
+import Data.Bits
 import qualified Data.Text.Internal as Text
 import qualified Data.Text.Unsafe as Unsafe
+import qualified Data.Text as Text
+import Data.Char
 
-clamp16 :: Int -> Text -> Int
-clamp16 i t@(Text.Text arr off _len)
-  | i <= 0 = 0
-  | i >= len = len
-  | isLowSurrogate = i - 1
-  | otherwise = i
+lengthWord16 :: Text -> Int
+lengthWord16 = Text.foldl' (\n c -> n + utf16Length c) 0
+
+utf16Length :: Char -> Int
+utf16Length c
+  | ord c < 0x10000 = 1
+  | otherwise = 2
+
+index8To16 :: Int -> Text -> Int
+index8To16 index8 t = go 0 0
   where
-    cp = Array.unsafeIndex arr (off + i)
-    isLowSurrogate = 0xDC00 <= cp && cp <= 0xDFFF
-    len = Unsafe.lengthWord16 t
+    index8' = min (Unsafe.lengthWord8 t) index8
+    go !i8 !i16
+      | i8 >= index8' = i16
+      | otherwise = do
+        let Unsafe.Iter c delta = Unsafe.iter t i8
+        go (i8 + delta) (i16 + utf16Length c)
+
+index16To8 :: Int -> Text -> Int
+index16To8 index16 t = go 0 0
+  where
+    length8 = Unsafe.lengthWord8 t
+    go !i8 !i16
+      | i8 >= length8 = i8
+      | i16 >= index16 = i8
+      | otherwise = do
+        let Unsafe.Iter c delta = Unsafe.iter t i8
+        go (i8 + delta) (i16 + utf16Length c)
 
 take16 :: Int -> Text -> Text
-take16 n t = Unsafe.takeWord16 (clamp16 n t) t
+take16 i16 t = Unsafe.takeWord8 (index16To8 i16 t) t
 
 drop16 :: Int -> Text -> Text
-drop16 n t = Unsafe.dropWord16 (clamp16 n t) t
+drop16 i16 t = Unsafe.dropWord8 (index16To8 i16 t) t
 
 split16At :: Int -> Text -> (Text, Text)
-split16At n t = (Unsafe.takeWord16 n' t, Unsafe.dropWord16 n' t)
-  where
-    n' = clamp16 n t
+split16At i16 t = split8At (index16To8 i16 t) t
 
-chunks16Of :: Int -> Text -> [Text]
-chunks16Of n t
+split8At :: Int -> Text -> (Text, Text)
+split8At i8 t = (Unsafe.takeWord8 i8 t, Unsafe.dropWord8 i8 t)
+
+clamp8 :: Int -> Text -> Int
+clamp8 i t@(Text.Text arr off _len)
+  | i <= 0 = 0
+  | i >= len = len
+  | isFirstCodeUnit = i
+  | otherwise = clamp8 (i - 1) t
+  where
+    cu = Array.unsafeIndex arr (off + i)
+    len = Unsafe.lengthWord8 t
+    isFirstCodeUnit = cu .&. 0b1100_0000 /= 0b1000_0000
+
+chunks8Of :: Int -> Text -> [Text]
+chunks8Of n t
   | len == 0 = []
   | len <= n = [t]
-  | otherwise = pre : chunks16Of n post
+  | otherwise = pre : chunks8Of n post
   where
-    (pre, post) = split16At n t
-    len = Unsafe.lengthWord16 t
+    (pre, post) = split8At (clamp8 n t) t
+    len = Unsafe.lengthWord8 t

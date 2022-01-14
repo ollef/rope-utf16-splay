@@ -4,7 +4,6 @@ module Main where
 import Data.Semigroup
 import Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.Text.Unsafe as Unsafe
 import Test.QuickCheck.Function as QC
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -35,7 +34,7 @@ main = defaultMain $ testGroup "Tests"
 
   , testProperty "length is UTF-16 code units" $ \s -> do
     let t = Text.pack s
-    Rope.length (Rope.fromText t) == Unsafe.lengthWord16 t
+    Rope.length (Rope.fromText t) == Rope.lengthWord16 t
 
   , testProperty "splitAt matches Text" $ \s i -> do
     let t = Text.pack s
@@ -50,13 +49,16 @@ main = defaultMain $ testGroup "Tests"
     let t = Text.pack s
     Rope.toText (Rope.drop i $ Rope.fromText t) == Rope.drop16 i t
 
-  , testProperty "rowColumnCodeUnits first line" $ \s i -> do
+  , testProperty "rowColumnCodeUnits first line" $ \s i8 -> do
     let t = Text.pack $ takeWhile (/= '\n') s
-    Rope.clamp16 i t == Rope.rowColumnCodeUnits (Rope.RowColumn 0 i) (Rope.fromText t)
+        i16 = Rope.index8To16 i8 t
+    i16 == Rope.rowColumnCodeUnits (Rope.RowColumn 0 i16) (Rope.fromText t)
 
-  , testProperty "rowColumnCodeUnits subsequent lines" $ \s (NonNegative newlines) (NonNegative i) -> do
-    let t = Text.pack $ replicate newlines '\n' ++ takeWhile (/= '\n') s
-    Rope.clamp16 (newlines + i) t == Rope.rowColumnCodeUnits (Rope.RowColumn newlines i) (Rope.fromText t)
+  , testProperty "rowColumnCodeUnits subsequent lines" $ \s (NonNegative newlines) (NonNegative i8) -> do
+    let t = Text.pack $ takeWhile (/= '\n') s
+        newlinest = Text.replicate newlines "\n" <> t
+        i16 = Rope.index8To16 i8 t
+    newlines + i16 == Rope.rowColumnCodeUnits (Rope.RowColumn newlines i16) (Rope.fromText newlinest)
 
   , testProperty "codeUnitsRowColumn" $ \s i -> do
     let t = Text.pack s
@@ -102,7 +104,7 @@ main = defaultMain $ testGroup "Tests"
   , testProperty "columns is number of code units of last line" $ \s -> do
     let t = Text.pack s
         lastLine = Text.takeWhileEnd (/= '\n') t
-        cols = Unsafe.lengthWord16 lastLine
+        cols = Rope.lengthWord16 lastLine
     Rope.columns (Rope.fromText t) == cols
 
   , testProperty "foldl matches Text" $ \s p a -> do
@@ -156,4 +158,4 @@ codeUnitsRowColumnSpec i t = r
       []   -> Rope.RowColumn 0 0
       [""] -> Rope.RowColumn 0 0
       _ -> do
-        Rope.RowColumn (length (init ts)) (Unsafe.lengthWord16 (last ts))
+        Rope.RowColumn (length (init ts)) (Rope.lengthWord16 (last ts))
