@@ -66,10 +66,10 @@ instance Monoid Rope where
   mappend = (<>)
 
 instance Eq Rope where
-  (==) = (==) `on` toText
+  (==) = (==) `on` toLazyText
 
 instance Ord Rope where
-  compare = compare `on` toText
+  compare = compare `on` toLazyText
 
 instance IsString Rope where
   fromString = fromText . Text.pack
