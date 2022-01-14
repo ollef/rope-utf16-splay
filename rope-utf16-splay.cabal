@@ -11,7 +11,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Olle Fredriksson
 maintainer:          fredriksson.olle@gmail.com
-copyright:           (c) 2018 Olle Fredriksson
+copyright:           (c) 2018-2022 Olle Fredriksson
 category:            Data, Text, Language
 build-type:          Simple
 extra-source-files:
