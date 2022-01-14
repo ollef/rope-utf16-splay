@@ -84,7 +84,7 @@ instance IsString Rope where
 null :: Rope -> Bool
 null (Rope r) = SplayTree.null r
 
--- | Length in code units (not characters)
+-- | Length in UTF-16 code units (not characters)
 length :: Rope -> Int
 length = codeUnits . SplayTree.measure
 
@@ -94,7 +94,7 @@ length = codeUnits . SplayTree.measure
 rows :: Rope -> Int
 rows (Rope r) = row $ rowColumn $ SplayTree.measure r
 
--- | The number of code units (not characters) since the last newline or the
+-- | The number of UTF-16 code units (not characters) since the last newline or the
 -- start of the rope
 --
 -- @since 0.3.0.0
@@ -168,7 +168,7 @@ unsnocChunk (Rope r) = case SplayTree.unsnoc r of
 -------------------------------------------------------------------------------
 -- * UTF-16 code unit indexing
 
--- | Split the rope at the nth code unit (not character)
+-- | Split the rope at the nth UTF-16 code unit (not character)
 splitAt :: Int -> Rope -> (Rope, Rope)
 splitAt n (Rope r) = case SplayTree.split ((> n) . codeUnits) r of
   SplayTree.Outside
@@ -179,15 +179,16 @@ splitAt n (Rope r) = case SplayTree.split ((> n) . codeUnits) r of
       n' = n - codeUnits (SplayTree.measure pre)
       (pret, postt) = split16At n' t
 
--- | Take the first n code units (not characters)
+-- | Take the first n UTF-16 code units (not characters)
 take :: Int -> Rope -> Rope
 take n = fst . Data.Rope.UTF16.Internal.splitAt n
 
--- | Drop the first n code units (not characters)
+-- | Drop the first n UTF-16 code units (not characters)
 drop :: Int -> Rope -> Rope
 drop n = snd . Data.Rope.UTF16.Internal.splitAt n
 
--- | Get the code unit index in the rope that corresponds to a 'RowColumn' position
+-- | Get the UTF-16 code unit index in the rope that corresponds to a
+-- 'RowColumn' position
 --
 -- @since 0.2.0.0
 rowColumnCodeUnits :: RowColumn -> Rope -> Int
