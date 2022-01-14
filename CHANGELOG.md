@@ -1,3 +1,7 @@
+# 0.4.0.0
+
+- Support `text-2.0` and up without backward compatibility
+
 # 0.3.2.0
 
 - Add `codeUnitsRowColumn` function
