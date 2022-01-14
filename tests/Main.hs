@@ -14,7 +14,17 @@ import qualified Data.Rope.UTF16.Internal.Text as Rope
 
 main :: IO ()
 main = defaultMain $ testGroup "Tests"
-  [ testProperty "toText . fromText = id" $ \s -> do
+  [ testProperty "Eq matches Text" $ \s1 s2 -> do
+    let t1  = Text.pack s1
+        t2  = Text.pack s2
+    (Rope.fromText t1 == Rope.fromText t2) == (t1 == t2)
+
+  , testProperty "Ord matches Text" $ \s1 s2 -> do
+    let t1  = Text.pack s1
+        t2  = Text.pack s2
+    (Rope.fromText t1 `compare` Rope.fromText t2) == (t1 `compare` t2)
+
+  , testProperty "toText . fromText = id" $ \s -> do
     let t = Text.pack s
     Rope.toText (Rope.fromText t) == t
 
